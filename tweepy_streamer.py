@@ -124,12 +124,18 @@ if __name__ == "__main__":
     tweet_listener = TwitterListener(fetched_tweets_filename)
     tweet_analyzer = TweetAnalyzer()
     api = twitter_client.get_twitter_client_api()
-    tweets = api.search(q="#gameofthrones", lang="en", count=100)
+    tweets = api.search(q="tsla", lang="en", count=101)
     df = tweet_analyzer.tweets_to_data_frame(tweets)
+    sentiment=[]
     df['sentiment'] = np.array([tweet_analyzer.analyze_sentiment(tweet) for tweet in df['tweets']])
     print(df.head(100000))    
-    time_sentiment = pd.Series(data=df['sentiment'].values, index = df['date'])
+    f=0
+    for x in df['sentiment'].values:
+        f+=x
+        sentiment.append(f)
+    time_sentiment = pd.Series(data= sentiment, index = df['date'])
     time_sentiment.plot(figsize=(16,4), color = 'r')
+    print(sentiment)
     plt.show()
 
 """
