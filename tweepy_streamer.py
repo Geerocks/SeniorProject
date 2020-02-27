@@ -111,18 +111,18 @@ class TweetAnalyzer():
         return df
 
 if __name__ == "__main__":
-    
+    """
     tweet_streamer = TwitterStreamer()
     fetched_tweets_filename = "tweets.txt"
     hash_tag_list = ["coronavirus"]
     tweet_streamer.stream_tweets(fetched_tweets_filename,hash_tag_list)
-    
+    """
 
     
-"""
-twitter_client= TwitterClient()
-   tweet_listener = TwitterListener(fetched_tweets_filename)
-tweet_analyzer = TweetAnalyzer()
+    fetched_tweets_filename = "tweets.txt"
+    twitter_client= TwitterClient()
+    tweet_listener = TwitterListener(fetched_tweets_filename)
+    tweet_analyzer = TweetAnalyzer()
     api = twitter_client.get_twitter_client_api()
     tweets = api.search(q="#gameofthrones", lang="en", count=100)
     df = tweet_analyzer.tweets_to_data_frame(tweets)
@@ -131,7 +131,7 @@ tweet_analyzer = TweetAnalyzer()
     time_sentiment = pd.Series(data=df['sentiment'].values, index = df['date'])
     time_sentiment.plot(figsize=(16,4), color = 'r')
     plt.show()
-"""
+
 """
     twitter_client= TwitterClient()
     tweet_analyzer = TweetAnalyzer()
