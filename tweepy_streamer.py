@@ -68,7 +68,8 @@ class TwitterListener(StreamListener):
         self.fetched_tweets_filename =fetched_tweets_filename
     def on_data(self,data):
         try:
-            print(data)
+            d = json.loads(data)
+            print(d['text'])
          
             with open(self.fetched_tweets_filename, 'a') as tf:
                 tf.write(data)
@@ -113,7 +114,7 @@ if __name__ == "__main__":
     
     tweet_streamer = TwitterStreamer()
     fetched_tweets_filename = "tweets.txt"
-    hash_tag_list = ["trump"]
+    hash_tag_list = ["coronavirus"]
     tweet_streamer.stream_tweets(fetched_tweets_filename,hash_tag_list)
     
 
