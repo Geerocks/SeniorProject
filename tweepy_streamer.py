@@ -53,8 +53,8 @@ class TwitterStreamer():
     def __init__(self):
         self.twitter_authenticator = TwitterAuthenticator()
 
-    def stream_tweets(self,fetched_tweets_filename, hash_tag_list):
-        listener=TwitterListener(fetched_tweets_filename)
+    def stream_tweets(self,fetched_tweets_filename, hash_tag_list, count):
+        listener=TwitterListener(fetched_tweets_filename, count)
         auth = self.twitter_authenticator.authenticate_twitter_app()
         stream = Stream(auth, listener)
         stream.filter(track=hash_tag_list, is_async=True) 
@@ -64,16 +64,20 @@ class TwitterListener(StreamListener):
     basic listener class that just prints received tweets to stdout
     """
     
-    def __init__(self, fetched_tweets_filename):
+    def __init__(self, fetched_tweets_filename, count):
         self.fetched_tweets_filename =fetched_tweets_filename
+        self.count = count
     def on_data(self,data):
+        x=0
         try:
-            d = json.loads(data)
-            print(d['text'])
-         
+            while (x < count):
+                d = json.loads(data)
+                print(d['text'])
+                x+=1
+
             with open(self.fetched_tweets_filename, 'a') as tf:
                 tf.write(data)
-            return True
+            return False
         except BaseException as e:
             print("Error on data: %s" %str(e))
         return True
@@ -111,20 +115,21 @@ class TweetAnalyzer():
         return df
 
 if __name__ == "__main__":
-    """
+
     tweet_streamer = TwitterStreamer()
     fetched_tweets_filename = "tweets.txt"
     hash_tag_list = ["coronavirus"]
-    tweet_streamer.stream_tweets(fetched_tweets_filename,hash_tag_list)
-    """
+    count = 100
+    tweet_streamer.stream_tweets(fetched_tweets_filename,hash_tag_list,count)
+  
 
-    
+    """
     fetched_tweets_filename = "tweets.txt"
     twitter_client= TwitterClient()
     tweet_listener = TwitterListener(fetched_tweets_filename)
     tweet_analyzer = TweetAnalyzer()
     api = twitter_client.get_twitter_client_api()
-    tweets = api.search(q="tsla", lang="en", count=101)
+    tweets = api.search(q="game", lang="en", count=10000)
     df = tweet_analyzer.tweets_to_data_frame(tweets)
     sentiment=[]
     df['sentiment'] = np.array([tweet_analyzer.analyze_sentiment(tweet) for tweet in df['tweets']])
@@ -137,7 +142,7 @@ if __name__ == "__main__":
     time_sentiment.plot(figsize=(16,4), color = 'r')
     print(sentiment)
     plt.show()
-
+    """
 """
     twitter_client= TwitterClient()
     tweet_analyzer = TweetAnalyzer()
