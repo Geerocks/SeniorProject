@@ -13,7 +13,10 @@ import re
 import matplotlib.pyplot as plt 
 import json
 import yfinance as yf
-#### TWITTER CLIENT ####
+from pandas_datareader import data as pdr
+
+import yfinance as yf
+
 
 class TwitterClient():
     def __init__(self,twitter_user=None):
