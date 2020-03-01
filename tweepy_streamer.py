@@ -12,7 +12,7 @@ import pandas as pd
 import re
 import matplotlib.pyplot as plt 
 import json
-
+import yfinance as yf
 #### TWITTER CLIENT ####
 
 class TwitterClient():
@@ -63,7 +63,6 @@ class TwitterListener(StreamListener):
     """
     basic listener class that just prints received tweets to stdout
     """
-    
     def __init__(self, fetched_tweets_filename, count):
         self.fetched_tweets_filename =fetched_tweets_filename
         self.count = count
