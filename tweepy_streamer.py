@@ -123,8 +123,9 @@ if __name__ == "__main__":
     hash_tag_list = ["coronavirus"]
     count = 100
     tweet_streamer.stream_tweets(fetched_tweets_filename,hash_tag_list,count)
-  
-
+    yf.pdr_override() # <== that's all it takes :-)
+    data = yf.download("SPY AAPL", start="2017-01-01", end="2017-04-30")
+    x=pdr.nasdaq_trader.get_nasdaq_symbols
     """
     fetched_tweets_filename = "tweets.txt"
     twitter_client= TwitterClient()
