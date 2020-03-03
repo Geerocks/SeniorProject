@@ -16,8 +16,8 @@ import yfinance as yf
 from pandas_datareader import data as pdr
 
 import yfinance as yf
-
-
+tweets = [] 
+num = 0
 class TwitterClient():
     def __init__(self,twitter_user=None):
         self.auth = TwitterAuthenticator().authenticate_twitter_app()
@@ -70,26 +70,48 @@ class TwitterListener(StreamListener):
         self.fetched_tweets_filename =fetched_tweets_filename
         self.count = count
     def on_data(self,data):
-        x=0
         try:
-            while (x < count):
-                d = json.loads(data)
-                print(d['text'])
-                x+=1
-
+            self.create_tweets(data)
             with open(self.fetched_tweets_filename, 'a') as tf:
                 tf.write(data)
-            return False
+            global num
+            num +=1
+            if(num<200):
+                return True
+            else:
+                analyze_livesentiment
+                return False          
         except BaseException as e:
             print("Error on data: %s" %str(e))
         return True
-
     def on_error(self,status):
         if status == 420:
             #Returning Galse on_data if limit is reached 
             return False
         print(status)
-    
+    def clean_tweet(self, tweet):
+        return ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)", " ", tweet).split())
+    def analyze_livesentiment(self, data):
+        d = json.loads(data)
+        df = pd.DataFrame(data=[d['text']], columns = ['tweets'])
+        analysis = TextBlob(self.clean_tweet(d['text']))
+        if analysis.sentiment.polarity > 0:
+            df['sentiment'] = 1
+        elif analysis.sentiment.polarity == 0:
+            df['sentiment'] = 0
+        else:
+            df['sentiment'] = -1
+       
+    def create_tweets(self, tweet):
+        global tweets
+        tweets.insert(0,tweet)
+        if(len(tweets) > 200):
+            return False
+        print(len(tweets))
+        
+
+
+        
 
 class TweetAnalyzer():
     #Functionality for analyzing and categorizing content from tweets
@@ -117,35 +139,41 @@ class TweetAnalyzer():
         return df
 
 if __name__ == "__main__":
-
     tweet_streamer = TwitterStreamer()
     fetched_tweets_filename = "tweets.txt"
     hash_tag_list = ["coronavirus"]
     count = 100
     tweet_streamer.stream_tweets(fetched_tweets_filename,hash_tag_list,count)
-    yf.pdr_override() # <== that's all it takes :-)
-    data = yf.download("SPY AAPL", start="2017-01-01", end="2017-04-30")
-    x=pdr.nasdaq_trader.get_nasdaq_symbols
+
+ 
+
+ 
+
     """
-    fetched_tweets_filename = "tweets.txt"
+        yf.pdr_override() # <== that's all it takes :-)
+    data = yf.download("SPY AAPL", start="2017-01-01", end="2017-04-30")
+    file_name = "data.csv"
+    data.to_csv(file_name, encoding='utf-8', index=False)
+     fetched_tweets_filename = "tweets.txt"
     twitter_client= TwitterClient()
-    tweet_listener = TwitterListener(fetched_tweets_filename)
+    tweet_listener = TwitterListener(fetched_tweets_filename,1)
     tweet_analyzer = TweetAnalyzer()
     api = twitter_client.get_twitter_client_api()
-    tweets = api.search(q="game", lang="en", count=10000)
-    df = tweet_analyzer.tweets_to_data_frame(tweets)
+       tweets = api.search(q="Bernie", lang="en", count=10)
+   df = tweet_analyzer.tweets_to_data_frame(tweets)
     sentiment=[]
     df['sentiment'] = np.array([tweet_analyzer.analyze_sentiment(tweet) for tweet in df['tweets']])
     print(df.head(100000))    
     f=0
     for x in df['sentiment'].values:
         f+=x
-        sentiment.append(f)
+        sentiment.insert(0,f)
     time_sentiment = pd.Series(data= sentiment, index = df['date'])
     time_sentiment.plot(figsize=(16,4), color = 'r')
     print(sentiment)
     plt.show()
     """
+    
 """
     twitter_client= TwitterClient()
     tweet_analyzer = TweetAnalyzer()
@@ -186,4 +214,4 @@ if __name__ == "__main__":
     time_retweets = pd.Series(data=df['retweets'].values, index = df['date'])
     time_retweets.plot(figsize=(16,4), label="retweets",legend = True)
     plt.show()
-    """
+"""
