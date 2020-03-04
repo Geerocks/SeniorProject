@@ -84,7 +84,7 @@ class TwitterListener(StreamListener):
                 tf.write(data)
             global num
             num +=1
-            if(num<100):
+            if(num<count):
                 return True
             else:
                 global tweets
@@ -95,7 +95,7 @@ class TwitterListener(StreamListener):
                 f=0
                 for x in df['sentiment'].values:
                     f+=x
-                    sentiment.insert(0,f)
+                    sentiment.append(f)
                 time_sentiment = pd.Series(data= sentiment, index = df['date'])
                 time_sentiment.plot(figsize=(16,4), color = 'r')
                 print(sentiment)
@@ -115,7 +115,7 @@ class TwitterListener(StreamListener):
     def create_tweets(self, tweet):
         global tweets
         tweets.insert(0,tweet)
-        if(len(tweets) > 100):
+        if(len(tweets) > count):
             return False
         print(len(tweets))
     def analyze_livesentiment(self, stuff):
@@ -161,8 +161,8 @@ class TweetAnalyzer():
 if __name__ == "__main__":
     tweet_streamer = TwitterStreamer()
     fetched_tweets_filename = "tweets.txt"
-    hash_tag_list = ["coronavirus"]
-    count = 100
+    hash_tag_list = ["Bernie"]
+    count = 100000
     tweet_streamer.stream_tweets(fetched_tweets_filename,hash_tag_list,count)
 
 
