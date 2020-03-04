@@ -18,6 +18,7 @@ from pandas_datareader import data as pdr
 import yfinance as yf
 tweets = [] 
 num = 0
+df =0
 class TwitterClient():
     def __init__(self,twitter_user=None):
         self.auth = TwitterAuthenticator().authenticate_twitter_app()
@@ -83,11 +84,22 @@ class TwitterListener(StreamListener):
                 tf.write(data)
             global num
             num +=1
-            if(num<10):
+            if(num<100):
                 return True
             else:
                 global tweets
-                print(self.analyze_livesentiment(tweets))
+                global df
+                df = self.analyze_livesentiment(tweets)
+                print(df)
+                sentiment= []
+                f=0
+                for x in df['sentiment'].values:
+                    f+=x
+                    sentiment.insert(0,f)
+                time_sentiment = pd.Series(data= sentiment, index = df['date'])
+                time_sentiment.plot(figsize=(16,4), color = 'r')
+                print(sentiment)
+                plt.show()
                 return False          
         except BaseException as e:
             print("Error on data: %s" %str(e))
@@ -103,18 +115,15 @@ class TwitterListener(StreamListener):
     def create_tweets(self, tweet):
         global tweets
         tweets.insert(0,tweet)
-        if(len(tweets) > 10):
+        if(len(tweets) > 100):
             return False
         print(len(tweets))
     def analyze_livesentiment(self, stuff):
         df = pd.DataFrame(data=[json.loads(tweet)['text'] for tweet in stuff], columns = ['tweets'])
         df['sentiment'] = np.array([self.sentiment(tweet) for tweet in df['tweets']])
-        df['id'] = np.array(json.loads(tweet)['id'] for tweet in stuff)
-        df['len'] = np.array(len(tweet) for tweet in df['tweets'])
-        df['date'] = np.array([tweet.created_at for tweet in tweets])
-        df['source'] = np.array([tweet.source for tweet in tweets])
-        df['likes'] = np.array([tweet.favorite_count for tweet in tweets])
-        df['retweets'] = np.array([tweet.retweet_count for tweet in tweets])      
+        df['id'] = np.array([json.loads(tweet)['id'] for tweet in stuff])
+        df['len'] = np.array([len(tweet) for tweet in df['tweets']])
+        df['date'] = np.array([json.loads(tweet)['created_at'] for tweet in stuff])    
         return df
     def sentiment(self, tweet):
         analysis = TextBlob(self.clean_tweet(tweet))
@@ -153,9 +162,9 @@ if __name__ == "__main__":
     tweet_streamer = TwitterStreamer()
     fetched_tweets_filename = "tweets.txt"
     hash_tag_list = ["coronavirus"]
-    count = 10
+    count = 100
     tweet_streamer.stream_tweets(fetched_tweets_filename,hash_tag_list,count)
-    tweet_data = tweet_streamer.return_livetweets(count)
+
 
         
 
