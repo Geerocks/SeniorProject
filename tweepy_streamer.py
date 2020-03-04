@@ -61,6 +61,13 @@ class TwitterStreamer():
         auth = self.twitter_authenticator.authenticate_twitter_app()
         stream = Stream(auth, listener)
         stream.filter(track=hash_tag_list, is_async=True) 
+    def return_livetweets(self, numb):
+        global tweets  
+        if (len(tweets)<numb):
+            (numb)
+        else:
+            return tweets   
+
 #### Twitter Stream Listener ####
 class TwitterListener(StreamListener):
     """
@@ -76,10 +83,11 @@ class TwitterListener(StreamListener):
                 tf.write(data)
             global num
             num +=1
-            if(num<200):
+            if(num<10):
                 return True
             else:
-                analyze_livesentiment
+                global tweets
+                print(self.analyze_livesentiment(tweets))
                 return False          
         except BaseException as e:
             print("Error on data: %s" %str(e))
@@ -91,28 +99,31 @@ class TwitterListener(StreamListener):
         print(status)
     def clean_tweet(self, tweet):
         return ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)", " ", tweet).split())
-    def analyze_livesentiment(self, data):
-        d = json.loads(data)
-        df = pd.DataFrame(data=[d['text']], columns = ['tweets'])
-        analysis = TextBlob(self.clean_tweet(d['text']))
-        if analysis.sentiment.polarity > 0:
-            df['sentiment'] = 1
-        elif analysis.sentiment.polarity == 0:
-            df['sentiment'] = 0
-        else:
-            df['sentiment'] = -1
        
     def create_tweets(self, tweet):
         global tweets
         tweets.insert(0,tweet)
-        if(len(tweets) > 200):
+        if(len(tweets) > 10):
             return False
         print(len(tweets))
-        
-
-
-        
-
+    def analyze_livesentiment(self, stuff):
+        df = pd.DataFrame(data=[json.loads(tweet)['text'] for tweet in stuff], columns = ['tweets'])
+        df['sentiment'] = np.array([self.sentiment(tweet) for tweet in df['tweets']])
+        df['id'] = np.array(json.loads(tweet)['id'] for tweet in stuff)
+        df['len'] = np.array(len(tweet) for tweet in df['tweets'])
+        df['date'] = np.array([tweet.created_at for tweet in tweets])
+        df['source'] = np.array([tweet.source for tweet in tweets])
+        df['likes'] = np.array([tweet.favorite_count for tweet in tweets])
+        df['retweets'] = np.array([tweet.retweet_count for tweet in tweets])      
+        return df
+    def sentiment(self, tweet):
+        analysis = TextBlob(self.clean_tweet(tweet))
+        if analysis.sentiment.polarity > 0:
+            return 1
+        elif analysis.sentiment.polarity == 0:
+            return 0
+        else:
+            return -1 
 class TweetAnalyzer():
     #Functionality for analyzing and categorizing content from tweets
     def clean_tweet(self, tweet):
@@ -142,15 +153,18 @@ if __name__ == "__main__":
     tweet_streamer = TwitterStreamer()
     fetched_tweets_filename = "tweets.txt"
     hash_tag_list = ["coronavirus"]
-    count = 100
+    count = 10
     tweet_streamer.stream_tweets(fetched_tweets_filename,hash_tag_list,count)
+    tweet_data = tweet_streamer.return_livetweets(count)
+
+        
+
+
+
 
  
-
- 
-
-    """
-        yf.pdr_override() # <== that's all it takes :-)
+"""
+ yf.pdr_override() # <== that's all it takes :-)
     data = yf.download("SPY AAPL", start="2017-01-01", end="2017-04-30")
     file_name = "data.csv"
     data.to_csv(file_name, encoding='utf-8', index=False)
@@ -172,7 +186,7 @@ if __name__ == "__main__":
     time_sentiment.plot(figsize=(16,4), color = 'r')
     print(sentiment)
     plt.show()
-    """
+"""
     
 """
     twitter_client= TwitterClient()
