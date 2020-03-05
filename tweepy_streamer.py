@@ -79,7 +79,9 @@ class TwitterListener(StreamListener):
         self.count = count
     def on_data(self,data):
         try:
-            self.create_tweets(data)
+            global tweets
+            tweets.insert(0,data)
+            print(len(tweets))
             with open(self.fetched_tweets_filename, 'a') as tf:
                 tf.write(data)
             global num
@@ -87,19 +89,10 @@ class TwitterListener(StreamListener):
             if(num<count):
                 return True
             else:
-                global tweets
                 global df
                 df = self.analyze_livesentiment(tweets)
                 print(df)
-                sentiment= []
-                f=0
-                for x in df['sentiment'].values:
-                    f+=x
-                    sentiment.append(f)
-                time_sentiment = pd.Series(data= sentiment, index = df['date'])
-                time_sentiment.plot(figsize=(16,4), color = 'r')
-                print(sentiment)
-                plt.show()
+                make_graph(df)
                 return False          
         except BaseException as e:
             print("Error on data: %s" %str(e))
@@ -111,13 +104,7 @@ class TwitterListener(StreamListener):
         print(status)
     def clean_tweet(self, tweet):
         return ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\/\/\S+)", " ", tweet).split())
-       
-    def create_tweets(self, tweet):
-        global tweets
-        tweets.insert(0,tweet)
-        if(len(tweets) > count):
-            return False
-        print(len(tweets))
+
     def analyze_livesentiment(self, stuff):
         df = pd.DataFrame(data=[json.loads(tweet)['text'] for tweet in stuff], columns = ['tweets'])
         df['sentiment'] = np.array([self.sentiment(tweet) for tweet in df['tweets']])
@@ -133,6 +120,16 @@ class TwitterListener(StreamListener):
             return 0
         else:
             return -1 
+    def make_graph(self, df):
+        sentiment= []
+        f=0
+        for x in df['sentiment'].values:
+            f+=x
+            sentiment.append(f)
+        time_sentiment = pd.Series(data= sentiment, index = df['date'])
+        time_sentiment.plot(figsize=(16,4), color = 'r')
+        print(sentiment)
+        plt.show()    
 class TweetAnalyzer():
     #Functionality for analyzing and categorizing content from tweets
     def clean_tweet(self, tweet):
@@ -161,8 +158,8 @@ class TweetAnalyzer():
 if __name__ == "__main__":
     tweet_streamer = TwitterStreamer()
     fetched_tweets_filename = "tweets.txt"
-    hash_tag_list = ["Bernie"]
-    count = 100000
+    hash_tag_list = ["sucks"]
+    count = 100
     tweet_streamer.stream_tweets(fetched_tweets_filename,hash_tag_list,count)
 
 
