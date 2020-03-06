@@ -92,7 +92,7 @@ class TwitterListener(StreamListener):
                 global df
                 df = self.analyze_livesentiment(tweets)
                 print(df)
-                make_graph(df)
+                self.make_graph(df)
                 return False          
         except BaseException as e:
             print("Error on data: %s" %str(e))
@@ -158,7 +158,7 @@ class TweetAnalyzer():
 if __name__ == "__main__":
     tweet_streamer = TwitterStreamer()
     fetched_tweets_filename = "tweets.txt"
-    hash_tag_list = ["sucks"]
+    hash_tag_list = ["djia"]
     count = 100
     tweet_streamer.stream_tweets(fetched_tweets_filename,hash_tag_list,count)
 
