@@ -80,7 +80,7 @@ class TwitterListener(StreamListener):
     def on_data(self,data):
         try:
             global tweets
-            tweets.insert(0,data)
+            tweets.append(data)
             print(len(tweets))
             with open(self.fetched_tweets_filename, 'a') as tf:
                 tf.write(data)
@@ -129,6 +129,8 @@ class TwitterListener(StreamListener):
         time_sentiment = pd.Series(data= sentiment, index = df['date'])
         time_sentiment.plot(figsize=(16,4), color = 'r')
         print(sentiment)
+        plt.title("Trump")
+        plt.ylabel("sentiment")
         plt.show()    
 class TweetAnalyzer():
     #Functionality for analyzing and categorizing content from tweets
@@ -158,8 +160,8 @@ class TweetAnalyzer():
 if __name__ == "__main__":
     tweet_streamer = TwitterStreamer()
     fetched_tweets_filename = "tweets.txt"
-    hash_tag_list = ["djia"]
-    count = 100
+    hash_tag_list = ["Trump"]
+    count = 1000
     tweet_streamer.stream_tweets(fetched_tweets_filename,hash_tag_list,count)
 
 
