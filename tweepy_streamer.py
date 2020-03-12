@@ -160,8 +160,8 @@ class TweetAnalyzer():
 if __name__ == "__main__":
     tweet_streamer = TwitterStreamer()
     fetched_tweets_filename = "tweets.txt"
-    hash_tag_list = ["Trump"]
-    count = 1000
+    hash_tag_list = ["stock market"]
+    count = 50000
     tweet_streamer.stream_tweets(fetched_tweets_filename,hash_tag_list,count)
 
 
