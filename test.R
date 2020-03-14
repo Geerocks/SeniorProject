@@ -1,3 +1,3 @@
-install.packages("rjson")
-x= read.text("tweets.txt")
-print(x)
+install.packages(dbConnect, type = "source")
+library(RMySQL)
+library(dbConnect)
