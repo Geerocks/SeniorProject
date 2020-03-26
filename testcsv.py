@@ -2,7 +2,7 @@ import csv
 import datetime
 import pprint
 
-with open('tesladata.csv', newline='') as csvfile:
+with open('tesladata_trunc.csv', newline='') as csvfile:
 	reader = csv.DictReader(csvfile, delimiter=',')
 
 	start_hour = 21
