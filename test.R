@@ -9,13 +9,13 @@ library(odbc)
 library(dbConnect)
 library(DBI)
 con <- dbConnect(RMySQL::MySQL(),
-    dbname = "TwitterDB",
+    dbname = "stockprice",
     host = "localhost",
     port = 3306,
     user = "root",
     password = "gaurav")
 
-res <- dbSendQuery(con, "SELECT created_at, polarity FROM tesla")
+res <- dbSendQuery(con, "SELECT price FROM aapl")
 str(res)
 
 dbFetch(res, 5)
