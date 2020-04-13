@@ -18,5 +18,13 @@ con <- dbConnect(RMySQL::MySQL(),
 res <- dbSendQuery(con, "SELECT price FROM aapl")
 str(res)
 
+con1 <- dbConnect(RMySQL::MySQL(),
+    dbname = "stockprice",
+    host = "localhost",
+    port = 3306,
+    user = "root",
+    password = "gaurav")
+
+lm(res ~ )
 dbFetch(res, 5)
 dbDisconnect(con)
