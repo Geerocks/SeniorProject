@@ -13,6 +13,6 @@ mydb = mysql.connector.connect(
 )
 count = 0
 
-p= si.get_top_crypto()
-price = p["Price (Intraday)"][0]
-print(price)
+p= si.get_live_price("spy")
+
+print(p)
