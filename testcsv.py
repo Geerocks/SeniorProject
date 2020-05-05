@@ -1,13 +1,21 @@
 import csv
 import datetime
 import pprint
-
-with open('tesladata_trunc.csv', newline='') as csvfile:
+import mysql.connector 
+mydb = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    passwd="gaurav",
+    database="netsentiment",
+    charset = 'utf8'
+)
+count = 0
+with open('t5.csv', newline='') as csvfile:
 	reader = csv.DictReader(csvfile, delimiter=',')
 
-	start_hour = 21
-	start_minute = 0
-	start_time = datetime.datetime(2020, 3, 18, start_hour, start_minute)
+	start_hour = 15
+	start_minute = 2
+	start_time = datetime.datetime(2020, 5, 1, start_hour, start_minute)
 
 	time_threshold = start_time
 	net_polarity = 0
@@ -18,13 +26,13 @@ with open('tesladata_trunc.csv', newline='') as csvfile:
 		# if tweet time is outside of the 10-min threshold, move the segment forward by 10 minutes
 		# before moving the segment, save the segment-net_polarity data pair
 		tweet_time = datetime.datetime.strptime(row['created_at'], '%Y-%m-%d %H:%M:%S')
-		if tweet_time >= time_threshold + datetime.timedelta(minutes=10):
+		if tweet_time >= time_threshold + datetime.timedelta(minutes=1):
 			# save segment-net_polarity data pair
 			time_threshold_str = datetime.datetime.strftime(time_threshold, '%Y-%m-%d %H:%M:%S')
 			segment_polarity_data[time_threshold_str] = net_polarity
 
 			# move segment forward by 10 minutes
-			time_threshold += datetime.timedelta(minutes=10)
+			time_threshold += datetime.timedelta(minutes=1)
 			net_polarity = 0
 
 		# update polarity (option 1, no error handling)
@@ -46,9 +54,24 @@ with open('tesladata_trunc.csv', newline='') as csvfile:
 		# print('Tweet:\n"' + row['text'] + '"')
 		# print('Polarity: ' + row['polarity'])
 		# print('\n')
-
+		
 	# save the last data pair
+
+	
 	time_threshold_str = datetime.datetime.strftime(time_threshold, '%Y-%m-%d %H:%M:%S')
 	segment_polarity_data[time_threshold_str] = net_polarity
-
-	print(segment_polarity_data)
+	for x in segment_polarity_data:
+		if mydb.is_connected():
+			mycursor = mydb.cursor()
+			"""mycursor.execute("CREATE TABLE {} ({})".format(settings.TABLE_NAME, "price VARCHAR(255), date DATETIME"))"""
+			if (count < 1):
+				mycursor.execute("CREATE TABLE {} ({})".format("t1", "date DATETIME, polarity INT(255)"))   
+				count += 1
+			sql = "INSERT INTO {} (date, polarity) VALUES (%s,%s)".format("t1")
+			date = x
+			polarity = segment_polarity_data[x]
+			val = (date, polarity)
+			mycursor.execute(sql, val)
+			mydb.commit()
+			mycursor.close()
+		
